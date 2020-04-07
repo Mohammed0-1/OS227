@@ -1,10 +1,10 @@
 
 public class Clock {
-	public int currentTime;
+	public static int currentTime;
 	public Clock() {
 		currentTime=0;
 	}
-	public void increment(int time) {
+	public static void increment(int time) {
 		currentTime+=time;
 	}
 

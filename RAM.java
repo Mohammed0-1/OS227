@@ -1,5 +1,5 @@
 
-public class RAM {
+public class RAM extends Thread {
 private final int size = 1000-320;
 private int ramInUse;
 private LinkedQueue<Process> jobQ;
@@ -10,6 +10,9 @@ public RAM() {
 	this.jobQ = new LinkedQueue<Process>();
 	this.readyQ = new PQKImp<Integer,Process>();
 	this.waitingProcesses = new LinkedQueue<Process>();
+}
+public void run(){
+
 }
 public void addToJobQ(Process p) {
 	jobQ.enqueue(p);
