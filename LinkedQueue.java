@@ -1,5 +1,5 @@
 
-public class LinkedQueue<T> implements Queue<T> {
+public class LinkedQueue<T>{
 	private Node<T> head, tail;
 	private int size;
 	

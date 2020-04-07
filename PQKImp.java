@@ -1,4 +1,4 @@
-public class PQKImp<P extends Comparable<P>, T> implements PQK<P, T> {
+public class PQKImp<P extends Comparable<P>, T> {
 	private PQNode<P,T> head;
 	private int size;
 	public PQKImp() {
