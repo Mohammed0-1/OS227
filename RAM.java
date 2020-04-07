@@ -33,7 +33,7 @@ public void addToReadyQ(Process p, Clock c) {
 public void addToWaiting(Process p) {
 	waitingProcesses.enqueue(p);
 	p.incrementMemoryWaits();
-	p.setState(State.waiting);
+	p.setState(STATE.waiting);
 }
 public void freeRAM(Process p) {
 	ramInUse-= p.getSize();
