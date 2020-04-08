@@ -24,9 +24,9 @@ public class LinkedQueue<T>{
 		tail = tail.next;
 		size++;
 	}
-	public Node<T> peek(){
+	public T peek(){
 		if(size>0)
-		return head;
+		return head.data;
 		return null;
 	}
 

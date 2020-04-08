@@ -14,7 +14,8 @@ public class Process {
 		this.PID = PID;
 		this.name = name;
 		this.startTime = start;
-		this.arrivalTime = (int)(1+Math.random()*81);
+		this.size =0;
+		this.arrivalTime = (int)(1+Math.random()*(81-1));
 		state = STATE.waiting;
 		this.CPUuses=this.IOuses=this.memoryWaits=this.numberOfPreemptions=0;
 		readyQueueTime = -1;
@@ -22,25 +23,26 @@ public class Process {
 		brusts = new LinkedQueue<Brust>();
 		for(int i =0;i<5;i++) {
 			if(i%2==0) {
-				int CPUbrust = (int)(10+Math.random()*101);
-				int ramUsage = (int)(5+Math.random()*201);
+				int CPUbrust = (int)(10+Math.random()*(101-10));
+				int ramUsage = (int)(5+Math.random()*(201-5));
 				brusts.enqueue(new CPUBrust(CPUbrust,ramUsage));
 			}else {
-				int IObrust = (int)(20+Math.random()*61);
+				int IObrust = (int)(20+Math.random()*(61-20));
 				brusts.enqueue(new IOBrust(IObrust));
 			}
 		}
 		brusts.enqueue(new CPUBrust(-1,0));
 		currentB = brusts.serve();
+		//this.addTosize(((CPUBrust)currentB).getMemoryValue());
 	}
-	public void killProcess(Clock c) {
+	public void killProcess() {
 		this.state = STATE.killed;
-		this.terminationTime = c.currentTime;
+		setTerminationTime(Clock.currentTime);
 		
 	}
-	public void terminateProcess(Clock c) {
+	public void terminateProcess() {
 		this.state = STATE.terminated;
-		this.terminationTime = c.currentTime;
+		setTerminationTime(Clock.currentTime);
 	}
 	public int getCPUuses() {
 		return CPUuses;
@@ -98,6 +100,9 @@ public class Process {
 	}
 	public int getSize() {
 		return size;
+	}
+	public void addTosize(int s) {
+		size+=s;
 	}
 	public int getReadyQueueTime() {
 		return readyQueueTime;
