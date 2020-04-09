@@ -63,7 +63,7 @@ public void longTermSchedular() {
 			p.incrementIOuses();
 		}
 	}
-	System.out.println("could not add "+jobQ.peek().getName()+"and its size is"+((CPUBrust)jobQ.peek().getCurrentB()).getMemoryValue());
+	System.out.println("could not add "+jobQ.peek().getName()+" and its size is"+((CPUBrust)jobQ.peek().getCurrentB()).getMemoryValue());
 	if(jobQ.length()!=0)
 		jobQ.enqueue(jobQ.serve());
 	System.out.println("exited while");
