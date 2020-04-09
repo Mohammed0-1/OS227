@@ -10,13 +10,13 @@ import Bursts.Burst;
  * next process.
  */
 public class IODevice extends Thread {
-    private static PCB currentProcess;
+    private static PCB cuProcess;
     
     // soqih,	list for processes waiting for an IO
     private static Queue<PCB> IOWaitingList; //PCB in waiting state
 
     public IODevice() {
-        currentProcess = null;
+        cuProcess = null;
         IOWaitingList = new ConcurrentLinkedQueue<>();
     }
 
@@ -26,15 +26,15 @@ public class IODevice extends Thread {
         //While OS is running, keep handling IO requests if available
         while(true) {
         	// soqih,	I don't know what poll() does
-        	currentProcess = IOWaitingList.poll();
+        	cuProcess = IOWaitingList.poll();
 
-            if(currentProcess != null) {
+            if(cuProcess != null) {
                 handleIORequest();
             } else {
             	// soqih,	I think we can replace "Utility.TIME" by 1
-                //sleep for x millisecond
+                //sleep for 1 millisecond
                 try {
-                    sleep(Utility.TIME);
+                    sleep(1);
                 } catch(InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -46,66 +46,66 @@ public class IODevice extends Thread {
     private void handleIORequest() { // soqih,	i didn't understand this method well 
         
     	// Increment the process IO counter
-        currentProcess.incrementIoCounter();
+        cuProcess.incrementIoCounter();
 
 //        System.out.print("["+currentProcess.getPid()+"] (" + currentProcess.getCurrentBurst().getRemainingTime()+ ") -->\t");
         
-        while(currentProcess.getCurrentBurst().getRemainingTime() > 0) {
+        while(cuProcess.getCurrentBurst().getRemainingTime() > 0) {
             // Increment total IO time of process
-            currentProcess.incrementIoTotalTime();
+            cuProcess.incrementIoTotalTime();
 
             // Decrement the process IO burst
-            currentProcess.getCurrentBurst().decrementRemainingTime();
+            cuProcess.getCurrentBurst().decrementRemainingTime();
 
 //            System.out.print(currentProcess.getCurrentBurst().getRemainingTime()+"\t");
             try {
                 //Wait for x millisecond
-                sleep(Utility.TIME);
+                sleep(1);
             } catch(InterruptedException e) {
                 e.printStackTrace();
             }
         }
 //        System.out.println();
 
-        Burst nextBurst = currentProcess.nextBurst();
+        Burst nxtProc = cuProcess.nextBurst();
 
-        if(nextBurst == null) {
-            currentProcess.terminateProcess();
+        if(nxtProc == null) {
+            cuProcess.terminateProcess();
             return;
         }
 
-        currentProcess.letProcessReady();
+        cuProcess.letProcessReady();
     }
     
     // soqih, simple method it adds the process to the waiting list in the IODevice
-    public void addProcessToDevice(PCB process) {
-    	IOWaitingList.add(process);
+    public void addProcessToDevice(PCB proc) {
+    	IOWaitingList.add(proc);
     }
     
     // soqih,	remove the process from the waiting IODevice list and kill it
-    void killProcessFromIOQueue(PCB process) {
-        if(IOWaitingList.remove(process)) {
-            process.killProcess();
+    void killProcessFromIOQueue(PCB proc) {
+        if(IOWaitingList.remove(proc)) {
+            proc.killProcess();
         }
     }
     
     // soqih,	get the max size process from the waiting list
     PCB getMaxProcess() {
-        Object[] list = IOWaitingList.toArray();
+        Object[] wList = IOWaitingList.toArray();
 
         // Let the first process be the max size process
-        PCB maxPCB = (PCB) list[0];
+        PCB maxSizePCB = (PCB) wList[0];
 
-        for(int i = 1; i < list.length; i++) {
-            PCB currentPCB = (PCB) list[i];
+        for(int i = 1; i < wList.length; i++) {
+            PCB currentPCB = (PCB) wList[i];
 
             // If current process size is greater than the max process
-            if(currentPCB.getSize() > maxPCB.getSize())
+            if(currentPCB.getSize() > maxSizePCB.getSize())
                 // Then, it is the new max process
-                maxPCB = currentPCB;
+                maxSizePCB = currentPCB;
         }
 
-        return maxPCB;
+        return maxSizePCB;
     }
 
     boolean isEmpty() { 
@@ -113,7 +113,7 @@ public class IODevice extends Thread {
     }
     	
     PCB getCurrentProcess() { 
-    	return currentProcess; 
+    	return cuProcess; 
     }
     	
     Queue<PCB> getWaitingList() {
