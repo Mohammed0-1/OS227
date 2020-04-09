@@ -21,7 +21,9 @@ public void run() {
 				e.printStackTrace();
 			}
 			downTime++;
+			System.out.println("down time "+downTime);
 			Clock.increment(1);
+			System.out.println("clock time "+Clock.currentTime);
 		}
 	}
 }
@@ -29,8 +31,10 @@ public void excute() {
 	Brust currentBrust = excutingProcess.getCurrentB();
 	while(currentBrust.getRemainingTime()>0) {
 		currentBrust.decrementRemainingTime();
+		System.out.println("ecxuting prcess "+excutingProcess.getName()+"current burst remaining time "+ currentBrust.getRemainingTime());
 		excutingProcess.incrmentCPUtime();
 		upTime++;
+		System.out.println("up time "+upTime);
 		Clock.increment(1);
 		currentBrust = checkReadyQueue(currentBrust);
 	}

@@ -35,11 +35,17 @@ public class Process {
 		currentB = brusts.serve();
 		//this.addTosize(((CPUBrust)currentB).getMemoryValue());
 	}
+	// Kills a process when the system is in deadlock.
+	// sets it termination time.
+	// sets the process state to KILLED.
 	public void killProcess() {
 		this.state = STATE.killed;
 		setTerminationTime(Clock.currentTime);
 		
 	}
+	// terminates a process when it finishes excution.
+		// sets it termination time.
+		// sets the process state to TERMINATED.
 	public void terminateProcess() {
 		this.state = STATE.terminated;
 		setTerminationTime(Clock.currentTime);

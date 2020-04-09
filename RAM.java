@@ -3,9 +3,9 @@ import java.util.concurrent.PriorityBlockingQueue;
 public class RAM extends Thread{
 private final int SIZE = 1000-320;
 private static int usedRAM;
-public static LinkedQueue<Process> jobQ;
-public static PQKImp<Integer,Process>readyQ;
-public static LinkedQueue<Process> waitingProcesses;
+public static LinkedQueue<Process> jobQ; // Jobs that have not entered the RAM yet.
+public static PQKImp<Integer,Process>readyQ; // Processes that are in the RAM.
+public static LinkedQueue<Process> waitingProcesses; // Processes that needed more memory than available.
 public RAM() {
 	this.usedRAM=0;
 	RAM.jobQ = new LinkedQueue<Process>();
@@ -21,25 +21,30 @@ public void run() {
 	while(true) {
 		midTermSchedular();
 		longTermSchedular();	
-		/*try {
-			Thread.sleep(1);
+		try {
+			Thread.sleep(5);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}*/
+		}
 	}
 }
+// Checks if the system is in a deadlock and handles the deadlock if there is one.
+// checks if there is enough space to satisfy memory needs for a process and insterts the process in the ready queue. 
 public void midTermSchedular(){
 	if(isDeadlock()) {
-		//get maxprocess p
-		//p.kill
+		Process max =getMaxProcess();
+		max.killProcess();
+		freeRAM(max);
 	}
-	while(waitingProcesses.length()!=0 && !enoughRAM(waitingProcesses.peek().getSize())) {
-		
+	while(waitingProcesses.length()!=0 && waitingProcesses.peek().getCurrentB() instanceof CPUBrust && enoughRAM(((CPUBrust)waitingProcesses.peek().getCurrentB()).getMemoryValue())) {
+		Process p = waitingProcesses.serve();
+		addToReadyQueue(p);
 	}
 	if(waitingProcesses.length()!=0)
 	System.out.println("the first process in waiting is "+waitingProcesses.peek().getName());
 }
+// takes jobs out of the job queue and inserts it in ready queue until the ram is 85% full.
 public void longTermSchedular() {
 	
 	while(jobQ.length()!=0 && enoughRAM(((CPUBrust)jobQ.peek().getCurrentB()).getMemoryValue())) {
@@ -51,19 +56,29 @@ public void longTermSchedular() {
 			System.out.println("the size of the first process in ready Q is "+readyQ.peek().data.getSize()+ " and it's name is "+ readyQ.peek().data.getName());
 			System.out.println("ram in use "+usedRAM);
 		}else {
-			// add to IOwaiting
+			/* add to IOwaiting
+			 * ****************
+			 * ****************
+			 */
 			p.incrementIOuses();
 		}
 	}
 	System.out.println("could not add "+jobQ.peek().getName()+"and its size is"+((CPUBrust)jobQ.peek().getCurrentB()).getMemoryValue());
 	if(jobQ.length()!=0)
-		addToWaiting(jobQ.serve());
+		jobQ.enqueue(jobQ.serve());
 	System.out.println("exited while");
 }
+// Adds a process to waiting queue.
+// Changes the process state to waiting.
+// incrments the process memory waits.
 public void addToWaiting(Process p) {
 	p.incrementMemoryWaits();
+	p.setState(STATE.waiting);
 	waitingProcesses.enqueue(p);
 }
+// Adds a process to ready queue.
+// Changes the process state to ready.
+// Allocates the ram as needed.
 public static void addToReadyQueue(Process p) {
 	if(p.getReadyQueueTime() == -1)
 		p.setReadyQueueTime(Clock.currentTime);
@@ -71,55 +86,36 @@ readyQ.enqueue(p.getCurrentB().getRemainingTime(), p);
 p.setState(STATE.ready);
 allocateRAM(p);
 }
+// Checks if the system is in a deadlock.
 public boolean isDeadlock() {
 	return waitingProcesses.length()!=0 && readyQ.length() ==0 && !enoughRAM(waitingProcesses.peek().getSize());
 }
+// Returns the process with the max size.
+private Process getMaxProcess() {
+	if(waitingProcesses.length()!=0) {
+		int length = waitingProcesses.length();
+		Process max =waitingProcesses.peek();
+		for(int i =0 ;i<length;i++) {
+			Process temp = waitingProcesses.serve();
+			waitingProcesses.enqueue(temp);
+			if(max.getSize()<temp.getSize())
+				max = temp;
+		}
+		return max;
+	}
+	return null;
+}
+// Frees memory if a process is killed or terminated.
 public void freeRAM(Process p) {
 	usedRAM -= p.getSize();
 }
+// Allocates memory to a process as needed.
 public static void allocateRAM(Process p) {
 	usedRAM += ((CPUBrust)p.getCurrentB()).getMemoryValue();
 	p.addTosize(((CPUBrust)p.getCurrentB()).getMemoryValue());
 }
+// Checks if the adding  a process will make the RAM 85% full or not.
 public boolean enoughRAM(int size) {
-	return size + usedRAM <SIZE*0.85;
+	return size + usedRAM <this.SIZE*0.85;
 }
 }
-/*
- public void longTermSchedular() {
-	Process p =
-}
-
-public void addToJobQ(Process p) {
-	jobQ.enqueue(p);
-}
-public Process serveJobQ() {
-	return jobQ.serve();
-}
-public void addToReadyQ(Process p, Clock c) {
-	
-	if (p!=null) {
-		if (ramIsEnough() && p.getBrusts().peek().data instanceof CPUBrust) {
-			if (ramInUse + ((CPUBrust) p.getBrusts().peek().data).getMemoryValue() < .85 * size) {
-				readyQ.enqueue(((CPUBrust) p.getBrusts().peek().data).getMemoryValue(), p);
-				p.setReadyQueueTime(c.currentTime);
-			} else {
-				addToWaiting(p);
-			}
-		} 
-	}
-}
-public void addToWaiting(Process p) {
-	waitingProcesses.enqueue(p);
-	p.incrementMemoryWaits();
-	p.setState(STATE.waiting);
-}
-public void freeRAM(Process p) {
-	ramInUse-= p.getSize();
-}
-public static PQKImp<Integer,Process> getReadyQueue(){
-	return readyQ;
-}
-private boolean ramIsEnough() {
-	return ramInUse<.85*size;
-} */
