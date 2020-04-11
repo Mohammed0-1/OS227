@@ -25,7 +25,7 @@ public class IODevice extends Thread {
     public void run() {
         //While OS is running, keep handling IO requests if available
         while(true) {
-        	// soqih,	I don't know what poll() does
+        	
         	cuProcess = IOWaitingList.poll();
 
             if(cuProcess != null) {

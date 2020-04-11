@@ -6,7 +6,6 @@ public class OperatingSystem {
     private static IODevice io;
     private static RAM ram;
     private static CPU cpu;
-    private static LineChart gui;
 
 //    RAM ram = new RAM(new IODevice());
 //    CPU cpu = new CPU(new RAM(new IODevice()));
@@ -19,12 +18,9 @@ public class OperatingSystem {
     
     
     public static void main(String[] args) {
-        // Make gui to save all information of ram usage
-        gui = new LineChart();
-
     	io = new IODevice();
-    	ram = new RAM(io, gui);
-    	cpu = new CPU(io, gui);
+    	ram = new RAM();
+    	cpu = new CPU();
 
         // Add processes to Waiting For Allocation Queue
        for(PCB p : FileHandler.readFile()){
@@ -44,8 +40,7 @@ public class OperatingSystem {
             e.printStackTrace();
         }
 
-        // Add the last size of memory ( ZERO )
-        gui.addToDataset(Clock.getCurrentMs(), RAM.getTotalRamUsage());
+       
 
         FileHandler.writeFile(finishedProcesses);
         System.out.println("Multiprogramming Operating System Simulation - [ Finished ]");
