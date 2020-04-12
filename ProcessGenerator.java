@@ -33,29 +33,29 @@ public class ProcessGenerator {
 
 			// write processes to file
 			FileWriter writer = new FileWriter(FILE_PATH);
+			Random rand = new Random();
+			int totalMemorySize = 0;
 
-			// each line represents a process, with 4 processBursts.
-			for (int i = 0; i < numProcesses; i++) {
-				// generate processBursts for numProcesses
-				// in the format of CPUBurstRange, memorySizeRequired, ArrivalTime, IOBurstRange
-				// |
-				generateBurst();
-				writer.write(CPUBurstRange + "\t" + memorySizeRequired + "\t" + ArrivalTime + "\t" + IOBurstRange
-						+ "\t | \t");
+			for (int i = 0; i < numProcesses; i++) { // each line represents a process
 
-				generateBurst();
-				writer.write(CPUBurstRange + "\t" + memorySizeRequired + "\t" + ArrivalTime + "\t" + IOBurstRange
-						+ "\t | \t");
+				int numBursts = rand.nextInt(6) + 2;
 
-				generateBurst();
-				writer.write(CPUBurstRange + "\t" + -memorySizeRequired + "\t" + ArrivalTime + "\t" + IOBurstRange
-						+ "\t | \t");
+				for (int j = 0; j < numBursts; j++) {
+					generateBurst();
+					
+					totalMemorySize += memorySizeRequired; // this block is to make the required memory size (-) when appropriate
+					if ((j == rand.nextInt(numBursts + 1) + 2) && totalMemorySize > memorySizeRequired) {
+						writer.write(CPUBurstRange + "\t" + -memorySizeRequired + "\t" + ArrivalTime + "\t"
+								+ IOBurstRange + "\t");
+						totalMemorySize -= memorySizeRequired;
+						continue;
+					}
+					
+					writer.write(CPUBurstRange + "\t" + memorySizeRequired + "\t" + ArrivalTime + "\t" + IOBurstRange
+							+ "\t");
 
-				generateBurst();
-				writer.write(CPUBurstRange + "\t" + 0 + "\t" + ArrivalTime + "\t" + IOBurstRange + "\t | \t");
-
+				}
 				writer.write("-1 \n");
-
 			}
 			writer.close();
 
@@ -72,7 +72,7 @@ public class ProcessGenerator {
 
 	// read from ProcessList file
 	public static LinkedQueue<Process> generateJobQ() {
-		String line; // represents a process, with 4 processBursts.
+		String line; // represents a process
 		int processID = 1; // used when reading a new process (TEST)
 		int CPUBurstRange, memorySizeRequired, ArrivalTime, IOBurstRange; // created local variables so it doesn't
 																			// conflict.
@@ -90,22 +90,39 @@ public class ProcessGenerator {
 				LinkedQueue<Burst> processBurstsQ = new LinkedQueue<>(); // holds the bursts of each process
 
 				// read and create the processBursts queue
-				for (int i = 0; i < 20; i += 5) { // i+=5 so we can read the next burst of the same process
-																	
-					// check if process ended (ie.no more bursts)
-					if (processArray[i].equals("-1")) {
-						break;
-					}
+				for (int i = 0; i < ProcessArrayLength; i += 4) { // i+=4 so we can read the next burst of the same
+																	// process
+
 					// allocate each burst to processBursts queue
+					// check if process ended (ie.no more bursts)
+//					if (Integer.parseInt(processArray[i]) < 0) {
+//						break;
+//					}
+
+					System.out.println(i); // test
+					if (processArray[i].charAt(0) == '-') {
+						processArray[i] = processArray[i].substring(1, processArray[i].length() - 1);
+//						CPUBurstRange = -Integer.parseInt(processArray[i]);
+						break;
+					} else {
+						CPUBurstRange = Integer.parseInt(processArray[i]);
+					}
 					CPUBurstRange = Integer.parseInt(processArray[i]);
-					memorySizeRequired = Integer.parseInt(processArray[i + 1]);
+
+					if (processArray[i + 1].charAt(0) == '-') {
+						processArray[i + 1] = processArray[i + 1].substring(1, processArray[i + 1].length() - 1);
+						memorySizeRequired = -Integer.parseInt(processArray[i + 1]);
+					} else {
+						memorySizeRequired = Integer.parseInt(processArray[i + 1]);
+					}
 					ArrivalTime = Integer.parseInt(processArray[i + 2]);
 					IOBurstRange = Integer.parseInt(processArray[i + 3]);
-					
+
 					Burst cpuBurst = new CPUBurst(CPUBurstRange, processID, memorySizeRequired, ArrivalTime);
 					Burst ioBurst = new IOBurst(IOBurstRange, processID);
 					processBurstsQ.enqueue(cpuBurst);
 					processBurstsQ.enqueue(ioBurst);
+
 				}
 
 //				PCB pcb = new PCB(processID, FullSize, processBurstsQ);   <--- this is what it should be
@@ -113,9 +130,9 @@ public class ProcessGenerator {
 //				processID++;											  <--- this is what it should be
 				Process p = new Process(processID, "", 0);
 				JobQ.enqueue(p);
-				processID++;	
+				processID++;
 			}
-			
+
 			reader.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -124,17 +141,19 @@ public class ProcessGenerator {
 	}
 
 	private static void generateBurst() {
-		CPUBurstRange = (int) (Math.random() * 91) + 10;
-		memorySizeRequired = (int) (Math.random() * 196) + 5;
-		IOBurstRange = (int) (Math.random() * 41) + 20;
-		ArrivalTime = (int) (Math.random() * 80) + 1;
+		Random r = new Random();
+
+		CPUBurstRange = r.nextInt(91) + 10;
+		memorySizeRequired = r.nextInt(196) + 5;
+		IOBurstRange = r.nextInt(41) + 20;
+		ArrivalTime = r.nextInt(80) + 1;
 	}
 
 //	Main test
 	public static void main(String[] args) {
-//		ProcessGenerator.generateProcesses(5);
-		LinkedQueue<Process> JobQ = ProcessGenerator.generateJobQ();
-		System.out.println(JobQ.serve().toString());
+		ProcessGenerator.generateProcesses(5);
+//		LinkedQueue<Process> JobQ = ProcessGenerator.generateJobQ();
+//		System.out.println(JobQ.serve().toString());
 	}
 
 }
