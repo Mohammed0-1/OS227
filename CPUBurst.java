@@ -1,7 +1,7 @@
-public class CPUBrust extends Brust {
+public class CPUBurst extends Burst {
 	private int memoryValue;
 
-	public CPUBrust(int time, int memoryValue) {
+	public CPUBurst(int time, int memoryValue) {
 		super(time);
 		this.memoryValue = memoryValue;
 	}

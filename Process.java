@@ -5,12 +5,12 @@ public class Process {
 	private int CPUuses, IOuses, memoryWaits,numberOfPreemptions;
 	private STATE state;
 	private int size;
-	private Brust currentB;
+	private Burst currentB;
 	private int readyQueueTime,CPUtime,IOtime;
 	private int startTime,terminationTime;
-	private LinkedQueue<Brust> brusts;
+	private LinkedQueue<Burst> bursts;
 	private int arrivalTime;
-	public Process(int PID, String name,int start) {
+	public Process(int PID, String name,int start,LinkedQueue<Burst> bursts) {
 		this.PID = PID;
 		this.name = name;
 		this.startTime = start;
@@ -20,19 +20,8 @@ public class Process {
 		this.CPUuses=this.IOuses=this.memoryWaits=this.numberOfPreemptions=0;
 		readyQueueTime = -1;
 		CPUtime = IOtime = 0;
-		brusts = new LinkedQueue<Brust>();
-		for(int i =0;i<5;i++) {
-			if(i%2==0) {
-				int CPUbrust = (int)(10+Math.random()*(101-10));
-				int ramUsage = (int)(5+Math.random()*(201-5));
-				brusts.enqueue(new CPUBrust(CPUbrust,ramUsage));
-			}else {
-				int IObrust = (int)(20+Math.random()*(61-20));
-				brusts.enqueue(new IOBrust(IObrust));
-			}
-		}
-		brusts.enqueue(new CPUBrust(-1,0));
-		currentB = brusts.serve();
+		this.bursts = bursts;
+		currentB = this.bursts.serve();
 		//this.addTosize(((CPUBrust)currentB).getMemoryValue());
 	}
 	// Kills a process when the system is in deadlock.
@@ -119,16 +108,16 @@ public class Process {
 	public int getStartTime() {
 		return startTime;
 	}
-	public LinkedQueue<Brust> getBrusts() {
-		return brusts;
+	public LinkedQueue<Burst> getBursts() {
+		return bursts;
 	} 
-	public Brust getCurrentB() {
+	public Burst getCurrentB() {
 		return currentB;
 	}
 	public double CPUUtilization() {
 		return CPUtime/(terminationTime-startTime);
 	}
 	public void nextBrust() {
-		currentB = brusts.serve();
+		currentB = bursts.serve();
 	}
 }

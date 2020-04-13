@@ -1,7 +1,7 @@
-public abstract class Brust {
+public abstract class Burst {
 	private int remainingTime;
 
-	public Brust(int time) {
+	public Burst(int time) {
 		this.remainingTime = time;
 	}
 	public int getRemainingTime() {

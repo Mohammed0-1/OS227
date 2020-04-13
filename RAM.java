@@ -6,14 +6,9 @@ private static int usedRAM;
 public static LinkedQueue<Process> jobQ; // Jobs that have not entered the RAM yet.
 public static PQKImp<Integer,Process>readyQ; // Processes that are in the RAM.
 public static LinkedQueue<Process> waitingProcesses; // Processes that needed more memory than available.
-public RAM() {
+public RAM(LinkedQueue<Process> jobq) {
 	this.usedRAM=0;
-	RAM.jobQ = new LinkedQueue<Process>();
-	int pid = 0; int start = 0; 
-	for(int i =0;i<100;i++) {
-		String name = "process " + pid;
-		jobQ.enqueue(new Process(pid++,name,start++));
-	}
+	RAM.jobQ = jobq; 
 	RAM.readyQ = new PQKImp<Integer,Process>();
 	RAM.waitingProcesses = new LinkedQueue<Process>();
 }
@@ -37,7 +32,7 @@ public void midTermSchedular(){
 		max.killProcess();
 		freeRAM(max);
 	}
-	while(waitingProcesses.length()!=0 && waitingProcesses.peek().getCurrentB() instanceof CPUBrust && enoughRAM(((CPUBrust)waitingProcesses.peek().getCurrentB()).getMemoryValue())) {
+	while(waitingProcesses.length()!=0 && waitingProcesses.peek().getCurrentB() instanceof CPUBurst && enoughRAM(((CPUBurst)waitingProcesses.peek().getCurrentB()).getMemoryValue())) {
 		Process p = waitingProcesses.serve();
 		addToReadyQueue(p);
 	}
@@ -47,9 +42,9 @@ public void midTermSchedular(){
 // takes jobs out of the job queue and inserts it in ready queue until the ram is 85% full.
 public void longTermSchedular() {
 	
-	while(jobQ.length()!=0 && enoughRAM(((CPUBrust)jobQ.peek().getCurrentB()).getMemoryValue())) {
+	while(jobQ.length()!=0 && enoughRAM(((CPUBurst)jobQ.peek().getCurrentB()).getMemoryValue())) {
 		Process p = jobQ.serve();
-		if(p.getCurrentB() instanceof CPUBrust) {
+		if(p.getCurrentB() instanceof CPUBurst) {
 			addToReadyQueue(p);
 			System.out.println("added " +p.getName()+" and it's size is "+ p.getSize()+" and it's first burst is "+ p.getCurrentB().getRemainingTime());
 			System.out.println("the length of readyQ is "+readyQ.length());
@@ -63,7 +58,7 @@ public void longTermSchedular() {
 			p.incrementIOuses();
 		}
 	}
-	System.out.println("could not add "+jobQ.peek().getName()+" and its size is"+((CPUBrust)jobQ.peek().getCurrentB()).getMemoryValue());
+	System.out.println("could not add "+jobQ.peek().getName()+" and its size is"+((CPUBurst)jobQ.peek().getCurrentB()).getMemoryValue());
 	if(jobQ.length()!=0)
 		jobQ.enqueue(jobQ.serve());
 	System.out.println("exited while");
@@ -111,8 +106,8 @@ public void freeRAM(Process p) {
 }
 // Allocates memory to a process as needed.
 public static void allocateRAM(Process p) {
-	usedRAM += ((CPUBrust)p.getCurrentB()).getMemoryValue();
-	p.addTosize(((CPUBrust)p.getCurrentB()).getMemoryValue());
+	usedRAM += ((CPUBurst)p.getCurrentB()).getMemoryValue();
+	p.addTosize(((CPUBurst)p.getCurrentB()).getMemoryValue());
 }
 // Checks if the adding  a process will make the RAM 85% full or not.
 public boolean enoughRAM(int size) {
