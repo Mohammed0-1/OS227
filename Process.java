@@ -97,7 +97,7 @@ public class Process {
 		return IOtime;
 	}
 
-	public void setIOtime(int iOtime) {
+	public void incrementIOtime() {
 		IOtime++;
 	}
 
