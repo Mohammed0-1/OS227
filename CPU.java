@@ -44,7 +44,7 @@ public class CPU extends Thread {
 
 			// test case ---------------------------------------
 			if (Test.TEST_MODE)
-				System.out.println("ecxuting prcess " + excutingProcess.getName() + "current burst remaining time "
+				System.out.println("ecxuting prcess " + excutingProcess.getPID() + "current burst remaining time "
 						+ currentBurst.getRemainingTime());
 			System.out.println("up time " + busyTime);
 			// -------------------------------------------------
