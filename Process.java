@@ -1,11 +1,14 @@
 import DataStructures.LinkedQueue;
 
 public class Process {
+
 	private int PID;
 	private int size;
-	private int arrivalTime, startTime, terminationTime, totalTime;
-	private int readyQueueTime, CPUtime, IOtime;
-	private int CPUuses, IOuses, memoryWaits, numberOfPreemptions;
+	private int arrivalTime;
+	private int totalTime;
+	private int startTime, terminationTime;
+	private int readyQueueTime, CPUtime, IOtime; // the time spent there
+	private int CPUUses, IOUses, memoryWaits, numberOfPreemptions;
 	private Burst currentBurst;
 	private STATE state;
 	private LinkedQueue<Burst> bursts;
@@ -19,8 +22,8 @@ public class Process {
 		this.readyQueueTime = -1;
 		this.CPUtime = 0;
 		this.IOtime = 0;
-		this.CPUuses = 0;
-		this.IOuses = 0;
+		this.CPUUses = 0;
+		this.IOUses = 0;
 		this.memoryWaits = 0;
 		this.numberOfPreemptions = 0;
 		this.currentBurst = this.bursts.serve(); // serve or peak??
@@ -45,68 +48,75 @@ public class Process {
 		setTerminationTime(Clock.currentTime);
 	}
 
-	public int getCPUuses() {
-		return CPUuses;
+	public void incrementCPUUses() {
+		CPUUses++;
 	}
 
-	public void incrementCPUuses() {
-		CPUuses++;
-	}
-
-	public int getIOuses() {
-		return IOuses;
-	}
-
-	public void incrementIOuses() { // number of times it performing IO
-		IOuses++;
-	}
-
-	public int getMemoryWaits() {
-		return memoryWaits;
+	public void incrementIOUses() { // number of times it performing IO
+		IOUses++;
 	}
 
 	public void incrementMemoryWaits() {
 		this.memoryWaits++;
 	}
 
-	public int getNumberOfPreemptions() {
-		return numberOfPreemptions;
-	}
-
 	public void incrementNumberOfPreemptions() {
 		this.numberOfPreemptions++;
-	}
-
-	public STATE getState() {
-		return state;
-	}
-
-	public void setState(STATE state) {
-		this.state = state;
-	}
-
-	public int getCPUtime() {
-		return CPUtime;
 	}
 
 	public void incrmentCPUtime() {
 		CPUtime++;
 	}
 
-	public int getIOtime() {
-		return IOtime;
-	}
-
 	public void incrementIOtime() {
 		IOtime++;
 	}
 
-	public int getTerminationTime() {
-		return terminationTime;
+	public void addTosize(int s) {
+		size += s;
 	}
 
-	public void setTerminationTime(int terminationTime) {
-		this.terminationTime = terminationTime;
+	public double CPUUtilization() {
+		return CPUtime / (terminationTime - startTime);
+	}
+
+	public void nextBurst() {
+		currentBurst = bursts.serve();
+	}
+
+//	Getters and Setters -----------------------------------
+
+	// Getters
+	public int getCPUUses() {
+		return CPUUses;
+	}
+
+	public int getIOUses() {
+		return IOUses;
+	}
+
+	public int getMemoryWaits() {
+		return memoryWaits;
+	}
+
+	public int getNumberOfPreemptions() {
+		return numberOfPreemptions;
+	}
+
+	public STATE getState() {
+		return state;
+	}
+
+	public int getCPUtime() {
+		return CPUtime;
+	}
+
+	public int getIOtime() {
+		return IOtime;
+	}
+
+	public int getTerminationTime() {
+		return terminationTime;
 	}
 
 	public int getPID() {
@@ -117,16 +127,8 @@ public class Process {
 		return size;
 	}
 
-	public void addTosize(int s) {
-		size += s;
-	}
-
 	public int getReadyQueueTime() {
 		return readyQueueTime;
-	}
-
-	public void setReadyQueueTime(int t) {
-		this.readyQueueTime = t;
 	}
 
 	public int getStartTime() {
@@ -140,20 +142,53 @@ public class Process {
 	public Burst getCurrentBurst() {
 		return currentBurst;
 	}
-	
+
 	public int getArrivalTime() {
 		return arrivalTime;
 	}
-	
+
 	public int getTotalTime() {
 		return totalTime;
 	}
 
-	public double CPUUtilization() {
-		return CPUtime / (terminationTime - startTime);
+	// Setters
+	public void setTerminationTime(int terminationTime) {
+		this.terminationTime = terminationTime;
 	}
 
-	public void nextBurst() {
-		currentBurst = bursts.serve();
+	public void setState(STATE state) {
+		this.state = state;
+	}
+
+	public void setReadyQueueTime(int t) {
+		this.readyQueueTime = t;
+	}
+
+	public void setStartTime(int startTime) {
+		this.startTime = startTime;
+	}
+
+	public void setCPUtime(int cPUtime) {
+		CPUtime = cPUtime;
+	}
+
+	public void setIOtime(int iOtime) {
+		IOtime = iOtime;
+	}
+
+	public void setCPUUses(int CPUUses) {
+		CPUUses = CPUUses;
+	}
+
+	public void setIOUses(int IOUses) {
+		IOUses = IOUses;
+	}
+
+	public void setMemoryWaits(int memoryWaits) {
+		this.memoryWaits = memoryWaits;
+	}
+
+	public void setNumberOfPreemptions(int numberOfPreemptions) {
+		this.numberOfPreemptions = numberOfPreemptions;
 	}
 }
