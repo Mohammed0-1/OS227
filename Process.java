@@ -85,8 +85,8 @@ public class Process {
 		return CPUtime / (terminationTime - startTime);
 	}
 
-	public void nextBurst() {
-		currentBurst = bursts.serve();
+	public Burst nextBurst() {
+		return currentBurst = bursts.serve();
 	}
 
 //	Getters and Setters -----------------------------------

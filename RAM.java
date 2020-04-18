@@ -5,11 +5,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class RAM extends Thread {
 	private static final int SIZE = 704; // 1024 - 320 MB
 	private static int usedRAM;
-	private static LinkedQueue<Process> jobQ; // Jobs that have not entered the RAM yet.
+	private static PQKImp<Integer, Process> jobQ; // Jobs that have not entered the RAM yet.
 	private static Queue<Process> waitingProcesses; // Processes that needed more memory than available.
 	private static PQKImp<Integer, Process> readyQ; // Processes that are in the RAM.
 
-	public RAM(LinkedQueue<Process> jobQ) {
+	public RAM(PQKImp<Integer, Process> jobQ) {
 		RAM.usedRAM = 0;
 		RAM.jobQ = jobQ;
 		RAM.readyQ = new PQKImp<Integer, Process>();
@@ -52,7 +52,7 @@ public class RAM extends Thread {
 	public void longTermSchedular() {
 
 		// check for total size of process and inserts to readyQ
-		while (jobQ.length() != 0 && enoughRAM(jobQ.peek())) {
+		while (jobQ.length() != 0 && enoughRAM(jobQ.peek().data)) {
 			Process p = jobQ.serve();
 			addToReadyQueue(p);
 
@@ -70,13 +70,15 @@ public class RAM extends Thread {
 
 		// test case ---------------------------------------
 		if (Test.TEST_MODE)
-			System.out.println("could not add " + jobQ.peek().getPID() + " and its size is"
-					+ ((CPUBurst) jobQ.peek().getCurrentBurst()).getMemoryValue());
+			System.out.println("could not add " + jobQ.peek().data.getPID() + " and its size is"
+					+ ((CPUBurst) jobQ.peek().data.getCurrentBurst()).getMemoryValue());
 		// -------------------------------------------------
 
 		// just waist time :)
-		if (jobQ.length() != 0)
-			jobQ.enqueue(jobQ.serve()); // we might do a sleep???
+		if (jobQ.length() != 0) {
+			Process p = jobQ.serve();
+			jobQ.enqueue(p.getArrivalTime(), p); // we might do a sleep???
+		}
 
 		// test case ---------------------------------------
 		if (Test.TEST_MODE)
@@ -129,8 +131,10 @@ public class RAM extends Thread {
 	}
 
 // Frees memory if a process is killed or terminated.
-	private void freeRAM(Process p) {
-		waitingProcesses.remove(p);
+	public static void freeRAM(Process p) {
+		if(p.getState() == STATE.waiting) {
+			waitingProcesses.remove(p);
+		}
 		usedRAM -= p.getSize();
 	}
 
@@ -151,6 +155,10 @@ public class RAM extends Thread {
 	
 	public static PQNode<Integer, Process> readyQPeek() {
 		return readyQ.peek();
+	}
+	
+	public static void readyQEnqueue(Process p) {
+		readyQ.enqueue(p.getTotalTime(), p);
 	}
 	
 }

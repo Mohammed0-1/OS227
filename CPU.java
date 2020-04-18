@@ -44,8 +44,9 @@ public class CPU extends Thread {
 
 		while (excutingProcess.getCurrentBurst() instanceof CPUBurst
 				&& excutingProcess.getCurrentBurst().getRemainingTime() > 0) {
-			
-			excutingProcess.setState(STATE.running); // set state to running
+
+			excutingProcess.setState(STATE.running); // set state to running // this is here because the process might
+														// come state.waiting when it is changed (checkReadyQueue)
 			excutingProcess.incrmentCPUtime(); // inc the time spent in CPU
 			excutingProcess.decrementTotalTime(); // dec process remaining time including burst time
 			busyTime++;
@@ -62,20 +63,25 @@ public class CPU extends Thread {
 			excutingProcess = checkReadyQueue(excutingProcess);
 			// sleep??
 		}
+		
+		// go to IOBurst
+		if (excutingProcess.nextBurst() != null) {
 
-		excutingProcess.nextBurst();
-		// if IO-burst
-		if (excutingProcess.getCurrentBurst() instanceof IOBurst) {
-			// add to IOwaiting
-		} else {
-			if (excutingProcess.getCurrentBurst().getRemainingTime() == -1) {
-				excutingProcess.terminateProcess();
+			// if IO-burst
+			if (excutingProcess.getCurrentBurst() instanceof IOBurst) {
+				// add to IOwaiting
 			} else {
-				RAM.addToReadyQueue(excutingProcess);
+				if (excutingProcess.getCurrentBurst().getRemainingTime() == -1) {
+					excutingProcess.terminateProcess();
+				} else {
+					RAM.addToReadyQueue(excutingProcess);
+				}
 			}
-		}
 
-//		}
+		} else {
+			excutingProcess.terminateProcess();
+			RAM.freeRAM(excutingProcess);
+		}
 	}
 
 	// close from the shortTimeScheduler idea
@@ -83,12 +89,11 @@ public class CPU extends Thread {
 		Process oldProcess = current;
 		Process newProcess = null;
 		// check if there is a shorter process
-		if (RAM.readyQPeek() != null
-				&& RAM.readyQPeek().data.getTotalTime() < oldProcess.getTotalTime()) { 
+		if (RAM.readyQPeek() != null && RAM.readyQPeek().data.getTotalTime() < oldProcess.getTotalTime()) {
 			oldProcess.incrementNumberOfPreemptions();
-			
-			if(RAM.enoughRAM(oldProcess)) {
-				RAM.addToReadyQueue(oldProcess); // return process to the readyQ
+
+			if (RAM.enoughRAM(oldProcess)) {
+				RAM.readyQEnqueue(oldProcess); // return process to the readyQ
 			} else {
 				RAM.addToWaiting(oldProcess); // goes to the midTermS
 			}

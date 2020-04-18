@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.*;
 import DataStructures.LinkedQueue;
+import DataStructures.PQKImp;
 
 /*
  * This class is used to generate processes to a file.
@@ -66,14 +67,14 @@ public class ProcessGenerator {
 	}
 
 	// read from ProcessList file
-	public static LinkedQueue<Process> generateJobQ() {
+	public static PQKImp<Integer, Process> generateJobQ() {
 		String line; // represents a process
 		int processID = 1;
 		int CPUBurstRange, burstMemorySize, IOBurstRange, arrivalTime; // created local variables so it doesn't conflict.
 		int processMemorySize = 0;
 		int processTotalTime = 0;
 																			
-		LinkedQueue<Process> jobQ = new LinkedQueue<>(); // the returned processes
+		PQKImp<Integer, Process> jobQ = new PQKImp<Integer, Process>(); // the returned processes
 
 		try {
 			// initiate a reader
@@ -95,6 +96,7 @@ public class ProcessGenerator {
 							System.out.println("Process" + processID + " has finished");
 						}
 						// -------------------------------------------------
+						processBurstsQ.serve(); // get rid of last IOBurst
 						break;
 					}
 					CPUBurstRange = Integer.parseInt(processArray[i]);
@@ -103,7 +105,7 @@ public class ProcessGenerator {
 					processMemorySize += burstMemorySize; // total memory size for process
 					processTotalTime += (CPUBurstRange + IOBurstRange); // total time required to finish process
 
-					Burst cpuBurst = new CPUBurst(CPUBurstRange, burstMemorySize/* , arrivalTime */);
+					Burst cpuBurst = new CPUBurst(CPUBurstRange, burstMemorySize);
 					Burst ioBurst = new IOBurst(IOBurstRange);
 					processBurstsQ.enqueue(cpuBurst);
 					processBurstsQ.enqueue(ioBurst);
@@ -112,7 +114,7 @@ public class ProcessGenerator {
 
 				arrivalTime = generateArrivalTime();
 				Process p = new Process(processID, arrivalTime, processMemorySize, processTotalTime, processBurstsQ);
-				jobQ.enqueue(p);
+				jobQ.enqueue(p.getArrivalTime(), p);
 				processID++;
 			}
 
@@ -142,7 +144,7 @@ public class ProcessGenerator {
 	public static void main(String[] args) {
 		if (Test.TEST_MODE) {
 			ProcessGenerator.generateProcesses(5);
-			LinkedQueue<Process> JobQ = ProcessGenerator.generateJobQ();
+			PQKImp<Integer, Process> JobQ = ProcessGenerator.generateJobQ();
 			for (int i = 0; i < JobQ.length(); i++) {
 				System.out.println(JobQ.serve().toString());
 			}
