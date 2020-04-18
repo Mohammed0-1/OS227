@@ -10,7 +10,7 @@ public class Clock {
 		currentTime++;
 	}
 
-	static int getCurrentMs() {
+	static int getCurrentTime() {
 		return currentTime;
 	}
 
