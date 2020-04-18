@@ -5,7 +5,7 @@ public class Process {
 	private int PID;
 	private int size;
 	private int arrivalTime;
-	private int totalTime;
+//	private int totalTime;
 	private int startTime, terminationTime;
 	private int readyQueueTime, CPUtime, IOtime; // the time spent there
 	private int CPUUses, IOUses, memoryWaits, numberOfPreemptions;
@@ -13,12 +13,12 @@ public class Process {
 	private STATE state;
 	private LinkedQueue<Burst> bursts;
 
-	public Process(int PID, int arrivalTime, int processSize, int totalTime, LinkedQueue<Burst> bursts) {
+	public Process(int PID, int arrivalTime, int processSize,/* int totalTime,*/ LinkedQueue<Burst> bursts) {
 		this.PID = PID;
 		this.size = processSize;
 		this.arrivalTime = arrivalTime;
 		this.startTime = -1;
-		this.totalTime = totalTime;
+//		this.totalTime = totalTime;
 		this.readyQueueTime = -1;
 		this.CPUtime = 0;
 		this.IOtime = 0;
@@ -72,10 +72,10 @@ public class Process {
 		IOtime++;
 	}
 	
-	public void decrementTotalTime() {  // dec process remaining time including burst time
-		this.totalTime--;
-		this.bursts.peek().decrementRemainingTime();
-	}
+//	public void decrementTotalTime() {  // dec process remaining time including burst time
+//		this.totalTime--;
+//		this.bursts.peek().decrementRemainingTime();
+//	}
 
 	public void addTosize(int s) {
 		size += s;
@@ -152,9 +152,9 @@ public class Process {
 		return arrivalTime;
 	}
 
-	public int getTotalTime() {
-		return totalTime;
-	}
+//	public int getTotalTime() {
+//		return totalTime;
+//	}
 
 	// Setters
 	public void setTerminationTime(int terminationTime) {

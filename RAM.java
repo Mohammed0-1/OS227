@@ -135,17 +135,17 @@ public class RAM extends Thread {
 		if(p.getState() == STATE.waiting) {
 			waitingProcesses.remove(p);
 		}
-		usedRAM -= p.getSize();
+		usedRAM -= ((CPUBurst)p.getCurrentBurst()).getMemoryValue();
 	}
 
 // Allocates memory to a process as needed.
 	private static void allocateRAM(Process p) {
-		usedRAM += p.getSize();
+		usedRAM += ((CPUBurst)p.getCurrentBurst()).getMemoryValue();
 	}
 
 // Checks if adding a process will make the RAM 85% full or not.
 	public static boolean enoughRAM(Process p) {
-		int size = p.getSize();
+		int size = ((CPUBurst)p.getCurrentBurst()).getMemoryValue();
 		return size + usedRAM <= SIZE * 0.85;
 	}
 	
@@ -158,7 +158,7 @@ public class RAM extends Thread {
 	}
 	
 	public static void readyQEnqueue(Process p) {
-		readyQ.enqueue(p.getTotalTime(), p);
+		readyQ.enqueue(p.getCurrentBurst().getRemainingTime(), p);
 	}
 	
 }

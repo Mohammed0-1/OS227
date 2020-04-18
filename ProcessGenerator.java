@@ -72,7 +72,7 @@ public class ProcessGenerator {
 		int processID = 1;
 		int CPUBurstRange, burstMemorySize, IOBurstRange, arrivalTime; // created local variables so it doesn't conflict.
 		int processMemorySize = 0;
-		int processTotalTime = 0;
+//		int processTotalTime = 0;
 																			
 		PQKImp<Integer, Process> jobQ = new PQKImp<Integer, Process>(); // the returned processes
 
@@ -103,7 +103,7 @@ public class ProcessGenerator {
 					burstMemorySize = Integer.parseInt(processArray[i + 1]);
 					IOBurstRange = Integer.parseInt(processArray[i + 2]);
 					processMemorySize += burstMemorySize; // total memory size for process
-					processTotalTime += (CPUBurstRange + IOBurstRange); // total time required to finish process
+//					processTotalTime += (CPUBurstRange + IOBurstRange); // total time required to finish process
 
 					Burst cpuBurst = new CPUBurst(CPUBurstRange, burstMemorySize);
 					Burst ioBurst = new IOBurst(IOBurstRange);
@@ -113,7 +113,7 @@ public class ProcessGenerator {
 				}
 
 				arrivalTime = generateArrivalTime();
-				Process p = new Process(processID, arrivalTime, processMemorySize, processTotalTime, processBurstsQ);
+				Process p = new Process(processID, arrivalTime, processMemorySize, processBurstsQ);
 				jobQ.enqueue(p.getArrivalTime(), p);
 				processID++;
 			}
