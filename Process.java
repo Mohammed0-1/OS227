@@ -71,6 +71,11 @@ public class Process {
 	public void incrementIOtime() {
 		IOtime++;
 	}
+	
+	public void decrementTotalTime() {  // dec process remaining time including burst time
+		this.totalTime--;
+		this.bursts.peek().decrementRemainingTime();
+	}
 
 	public void addTosize(int s) {
 		size += s;

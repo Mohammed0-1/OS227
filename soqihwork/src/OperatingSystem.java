@@ -1,7 +1,8 @@
 import java.util.LinkedList;
+import java.io.*;
 
 public class OperatingSystem {
-    private static LinkedList<PCB> finishedProcesses = new LinkedList<>();
+    private static LinkedList<Process> finishedProcesses = new LinkedList<>();
     private static int size = 0;
     private static IODevice io;
     private static RAM ram;
@@ -23,7 +24,7 @@ public class OperatingSystem {
     	cpu = new CPU();
 
         // Add processes to Waiting For Allocation Queue
-       for(PCB p : FileHandler.readFile()){
+       for(Process p : FileHandler.readFile()){
     	   size++;
     	   RAM.addToJobQ(p);
        }
@@ -54,7 +55,7 @@ public class OperatingSystem {
     }
 
     
-    static void addFinishedProcess(PCB process) {
+    static void addFinishedProcess(Process process) {
         finishedProcesses.add(process);
     }
     

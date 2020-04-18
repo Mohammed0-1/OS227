@@ -71,6 +71,7 @@ public class ProcessGenerator {
 		int processID = 1;
 		int CPUBurstRange, burstMemorySize, IOBurstRange, arrivalTime; // created local variables so it doesn't conflict.
 		int processMemorySize = 0;
+		int processTotalTime = 0;
 																			
 		LinkedQueue<Process> jobQ = new LinkedQueue<>(); // the returned processes
 
@@ -100,6 +101,7 @@ public class ProcessGenerator {
 					burstMemorySize = Integer.parseInt(processArray[i + 1]);
 					IOBurstRange = Integer.parseInt(processArray[i + 2]);
 					processMemorySize += burstMemorySize; // total memory size for process
+					processTotalTime += (CPUBurstRange + IOBurstRange); // total time required to finish process
 
 					Burst cpuBurst = new CPUBurst(CPUBurstRange, burstMemorySize/* , arrivalTime */);
 					Burst ioBurst = new IOBurst(IOBurstRange);
@@ -109,7 +111,7 @@ public class ProcessGenerator {
 				}
 
 				arrivalTime = generateArrivalTime();
-				Process p = new Process(processID, arrivalTime, processMemorySize, processBurstsQ);
+				Process p = new Process(processID, arrivalTime, processMemorySize, processTotalTime, processBurstsQ);
 				jobQ.enqueue(p);
 				processID++;
 			}

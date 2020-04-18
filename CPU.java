@@ -12,19 +12,25 @@ public class CPU extends Thread {
 	@Override
 	public void run() {
 		while (true) {
-			this.excutingProcess = RAM.readyQ.serve();
+			excutingProcess = RAM.readyQ.serve();
 			if (excutingProcess != null) {
 				excuteProcess();
 			} else {
 				try {
-					sleep(5);
+					sleep(1);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 				idelTime++;
-				System.out.println("down time " + idelTime);
 				Clock.incrementClock();
-				System.out.println("clock time " + Clock.currentTime);
+
+				// test case ---------------------------------------
+				if (Test.TEST_MODE) {
+					System.out.println("down time " + idelTime);
+					System.out.println("clock time " + Clock.currentTime);
+				}
+				// -------------------------------------------------
+
 			}
 		}
 	}
@@ -32,37 +38,45 @@ public class CPU extends Thread {
 	// handle the process in the CPU
 	public void excuteProcess() {
 		excutingProcess.setState(STATE.running); // set state to running
-
-		Burst currentBurst = excutingProcess.getCurrentBurst(); // get the first burst of the process
-		// increment cpu counter/uses??
-
-		while (currentBurst.getRemainingTime() > 0) {
-			Clock.incrementClock();
-			excutingProcess.incrmentCPUtime();
-			busyTime++;
-			currentBurst.decrementRemainingTime();
-
-			// test case ---------------------------------------
-			if (Test.TEST_MODE)
-				System.out.println("ecxuting prcess " + excutingProcess.getPID() + "current burst remaining time "
-						+ currentBurst.getRemainingTime());
-			System.out.println("up time " + busyTime);
-			// -------------------------------------------------
-
-			currentBurst = checkReadyQueue(currentBurst);
-			// sleep??
+		if (excutingProcess.getStartTime() == -1) {
+			excutingProcess.setStartTime(Clock.getCurrentTime()); // the time it started execution
 		}
+		excutingProcess.incrementCPUUses();// inc the num of times entered CPU
 
-		excutingProcess.nextBurst();
-		if (excutingProcess.getCurrentBurst() instanceof IOBurst) {
-			// add to IOwaiting
-		} else {
-			if (excutingProcess.getCurrentBurst().getRemainingTime() == -1) {
-				excutingProcess.terminateProcess();
-			} else {
-				RAM.addToReadyQueue(excutingProcess);
+//		while (excutingProcess.getTotalTime() > 0) {
+//			Burst currentBurst = excutingProcess.getCurrentBurst(); // get the first burst of the process
+
+			while (excutingProcess.getCurrentBurst() instanceof CPUBurst && excutingProcess.getTotalTime() > 0) {
+				excutingProcess.incrmentCPUtime(); // inc the time spent in CPU
+				excutingProcess.decrementTotalTime(); // dec process remaining time including burst time
+				busyTime++;
+				Clock.incrementClock();
+
+				// test case ---------------------------------------
+				if (Test.TEST_MODE) {
+					System.out.println("ecxuting prcess " + excutingProcess.getPID() + "current burst remaining time "
+							+ excutingProcess.getCurrentBurst().getRemainingTime());
+					System.out.println("up time " + busyTime);
+				}
+				// -------------------------------------------------
+
+				currentBurst = checkReadyQueue(currentBurst); // change to process instead of burst
+				// sleep??
 			}
-		}
+
+			excutingProcess.nextBurst();
+			// if IO-burst
+			if (excutingProcess.getCurrentBurst() instanceof IOBurst) {
+				// add to IOwaiting
+			} else {
+				if (excutingProcess.getCurrentBurst().getRemainingTime() == -1) {
+					excutingProcess.terminateProcess();
+				} else {
+					RAM.addToReadyQueue(excutingProcess);
+				}
+			}
+
+//		}
 	}
 
 	// close from the shortTimeScheduler idea
