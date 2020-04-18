@@ -2,30 +2,30 @@ import DataStructures.LinkedQueue;
 
 public class Process {
 	private int PID;
-	private int CPUuses, IOuses, memoryWaits, numberOfPreemptions;
-	private STATE state;
 	private int size;
-	private Burst currentBurst;
+	private int arrivalTime, startTime, terminationTime, totalTime;
 	private int readyQueueTime, CPUtime, IOtime;
-	private int startTime, terminationTime;
+	private int CPUuses, IOuses, memoryWaits, numberOfPreemptions;
+	private Burst currentBurst;
+	private STATE state;
 	private LinkedQueue<Burst> bursts;
-	private int arrivalTime;
 
-	public Process(int PID, int arrivalTime, int processSize, LinkedQueue<Burst> bursts) {
+	public Process(int PID, int arrivalTime, int processSize, int totalTime, LinkedQueue<Burst> bursts) {
 		this.PID = PID;
-		this.startTime = -1;
 		this.size = processSize;
 		this.arrivalTime = arrivalTime;
-		this.state = STATE.waiting;
+		this.startTime = -1;
+		this.totalTime = totalTime;
+		this.readyQueueTime = -1;
+		this.CPUtime = 0;
+		this.IOtime = 0;
 		this.CPUuses = 0;
 		this.IOuses = 0;
 		this.memoryWaits = 0;
 		this.numberOfPreemptions = 0;
-		this.readyQueueTime = -1;
-		this.CPUtime = 0;
-		this.IOtime = 0;
-		this.bursts = bursts;
 		this.currentBurst = this.bursts.serve(); // serve or peak??
+		this.state = STATE.waiting;
+		this.bursts = bursts;
 	}
 
 	// Kills a process when the system is in deadlock.
@@ -143,6 +143,10 @@ public class Process {
 	
 	public int getArrivalTime() {
 		return arrivalTime;
+	}
+	
+	public int getTotalTime() {
+		return totalTime;
 	}
 
 	public double CPUUtilization() {
