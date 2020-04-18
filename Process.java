@@ -26,9 +26,9 @@ public class Process {
 		this.IOUses = 0;
 		this.memoryWaits = 0;
 		this.numberOfPreemptions = 0;
-		this.currentBurst = this.bursts.serve(); // serve or peak??
-		this.state = STATE.waiting;
 		this.bursts = bursts;
+		this.state = STATE.waiting;
+		this.currentBurst = this.bursts.serve(); // serve or peak??
 	}
 
 	// Kills a process when the system is in deadlock.

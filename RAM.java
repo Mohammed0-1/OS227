@@ -3,14 +3,14 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RAM extends Thread {
-	private final int SIZE = 704; // 1024 - 320 MB
+	private static final int SIZE = 704; // 1024 - 320 MB
 	private static int usedRAM;
 	private static LinkedQueue<Process> jobQ; // Jobs that have not entered the RAM yet.
 	private static Queue<Process> waitingProcesses; // Processes that needed more memory than available.
-	public static PQKImp<Integer, Process> readyQ; // Processes that are in the RAM.
+	private static PQKImp<Integer, Process> readyQ; // Processes that are in the RAM.
 
 	public RAM(LinkedQueue<Process> jobQ) {
-		this.usedRAM = 0;
+		RAM.usedRAM = 0;
 		RAM.jobQ = jobQ;
 		RAM.readyQ = new PQKImp<Integer, Process>();
 		RAM.waitingProcesses = new ConcurrentLinkedQueue<Process>();
@@ -36,7 +36,7 @@ public class RAM extends Thread {
 			max.killProcess();
 			freeRAM(max);
 		}
-		while (waitingProcesses.size() != 0 && enoughRAM(waitingProcesses.peek().getSize())) {
+		while (waitingProcesses.size() != 0 && enoughRAM(waitingProcesses.peek())) {
 			Process p = waitingProcesses.poll();
 			addToReadyQueue(p);
 		}
@@ -52,7 +52,7 @@ public class RAM extends Thread {
 	public void longTermSchedular() {
 
 		// check for total size of process and inserts to readyQ
-		while (jobQ.length() != 0 && enoughRAM(jobQ.peek().getSize())) {
+		while (jobQ.length() != 0 && enoughRAM(jobQ.peek())) {
 			Process p = jobQ.serve();
 			addToReadyQueue(p);
 
@@ -88,7 +88,7 @@ public class RAM extends Thread {
 // Adds a process to waiting queue.
 // Changes the process state to waiting.
 // increments the process memory waits.
-	public void addToWaiting(Process p) { // used in CPU
+	public static void addToWaiting(Process p) { // used in CPU
 		p.incrementMemoryWaits();
 		p.setState(STATE.waiting);
 		waitingProcesses.add(p);
@@ -108,8 +108,8 @@ public class RAM extends Thread {
 	}
 
 // Checks if the system is in a deadlock.
-	public boolean isDeadlock() {
-		return waitingProcesses.size() != 0 && readyQ.length() == 0 && !enoughRAM(waitingProcesses.peek().getSize());
+	private boolean isDeadlock() {
+		return waitingProcesses.size() != 0 && readyQ.length() == 0 && !enoughRAM(waitingProcesses.peek());
 	}
 
 // Returns the process with the max size.
@@ -129,18 +129,28 @@ public class RAM extends Thread {
 	}
 
 // Frees memory if a process is killed or terminated.
-	public void freeRAM(Process p) {
+	private void freeRAM(Process p) {
 		waitingProcesses.remove(p);
 		usedRAM -= p.getSize();
 	}
 
 // Allocates memory to a process as needed.
-	public static void allocateRAM(Process p) {
+	private static void allocateRAM(Process p) {
 		usedRAM += p.getSize();
 	}
 
 // Checks if adding a process will make the RAM 85% full or not.
-	public boolean enoughRAM(int size) {
-		return size + usedRAM <= this.SIZE * 0.85;
+	public static boolean enoughRAM(Process p) {
+		int size = p.getSize();
+		return size + usedRAM <= SIZE * 0.85;
 	}
+	
+	public static Process readyQServe() {
+		return readyQ.serve();
+	}
+	
+	public static PQNode<Integer, Process> readyQPeek() {
+		return readyQ.peek();
+	}
+	
 }

@@ -1,18 +1,18 @@
 public class CPU extends Thread {
-	private Process excutingProcess;
-	private int busyTime;
-	private int idelTime;
+	private static Process excutingProcess;
+	private static int busyTime;
+	private static int idelTime;
 
 	public CPU() {
-		this.excutingProcess = null;
-		this.busyTime = 0;
-		this.idelTime = 0;
+		CPU.excutingProcess = null;
+		CPU.busyTime = 0;
+		CPU.idelTime = 0;
 	}
 
 	@Override
 	public void run() {
 		while (true) {
-			excutingProcess = RAM.readyQ.serve();
+			excutingProcess = RAM.readyQServe();
 			if (excutingProcess != null) {
 				excuteProcess();
 			} else {
@@ -37,68 +37,72 @@ public class CPU extends Thread {
 
 	// handle the process in the CPU
 	public void excuteProcess() {
-		excutingProcess.setState(STATE.running); // set state to running
 		if (excutingProcess.getStartTime() == -1) {
 			excutingProcess.setStartTime(Clock.getCurrentTime()); // the time it started execution
 		}
 		excutingProcess.incrementCPUUses();// inc the num of times entered CPU
 
-//		while (excutingProcess.getTotalTime() > 0) {
-//			Burst currentBurst = excutingProcess.getCurrentBurst(); // get the first burst of the process
+		while (excutingProcess.getCurrentBurst() instanceof CPUBurst
+				&& excutingProcess.getCurrentBurst().getRemainingTime() > 0) {
+			
+			excutingProcess.setState(STATE.running); // set state to running
+			excutingProcess.incrmentCPUtime(); // inc the time spent in CPU
+			excutingProcess.decrementTotalTime(); // dec process remaining time including burst time
+			busyTime++;
+			Clock.incrementClock();
 
-			while (excutingProcess.getCurrentBurst() instanceof CPUBurst && excutingProcess.getTotalTime() > 0) {
-				excutingProcess.incrmentCPUtime(); // inc the time spent in CPU
-				excutingProcess.decrementTotalTime(); // dec process remaining time including burst time
-				busyTime++;
-				Clock.incrementClock();
-
-				// test case ---------------------------------------
-				if (Test.TEST_MODE) {
-					System.out.println("ecxuting prcess " + excutingProcess.getPID() + "current burst remaining time "
-							+ excutingProcess.getCurrentBurst().getRemainingTime());
-					System.out.println("up time " + busyTime);
-				}
-				// -------------------------------------------------
-
-				currentBurst = checkReadyQueue(currentBurst); // change to process instead of burst
-				// sleep??
+			// test case ---------------------------------------
+			if (Test.TEST_MODE) {
+				System.out.println("ecxuting prcess " + excutingProcess.getPID() + "current burst remaining time "
+						+ excutingProcess.getCurrentBurst().getRemainingTime());
+				System.out.println("up time " + busyTime);
 			}
+			// -------------------------------------------------
 
-			excutingProcess.nextBurst();
-			// if IO-burst
-			if (excutingProcess.getCurrentBurst() instanceof IOBurst) {
-				// add to IOwaiting
+			excutingProcess = checkReadyQueue(excutingProcess);
+			// sleep??
+		}
+
+		excutingProcess.nextBurst();
+		// if IO-burst
+		if (excutingProcess.getCurrentBurst() instanceof IOBurst) {
+			// add to IOwaiting
+		} else {
+			if (excutingProcess.getCurrentBurst().getRemainingTime() == -1) {
+				excutingProcess.terminateProcess();
 			} else {
-				if (excutingProcess.getCurrentBurst().getRemainingTime() == -1) {
-					excutingProcess.terminateProcess();
-				} else {
-					RAM.addToReadyQueue(excutingProcess);
-				}
+				RAM.addToReadyQueue(excutingProcess);
 			}
+		}
 
 //		}
 	}
 
 	// close from the shortTimeScheduler idea
-	public Burst checkReadyQueue(Burst current) {
-		// check if there is a shorter burst
-		if (RAM.readyQ.peek() != null
-				&& RAM.readyQ.peek().data.getCurrentBurst().getRemainingTime() < current.getRemainingTime()) {
-			excutingProcess.incrementNumberOfPreemptions();
-			excutingProcess.setState(STATE.ready);
-			RAM.readyQ.enqueue(current.getRemainingTime(), excutingProcess); // return the currentBurst to the readyQ
-			excutingProcess = RAM.readyQ.serve(); // change to the shorter burst
-			excutingProcess.setState(STATE.running);
-			return excutingProcess.getCurrentBurst();
+	public Process checkReadyQueue(Process current) {
+		Process oldProcess = current;
+		Process newProcess = null;
+		// check if there is a shorter process
+		if (RAM.readyQPeek() != null
+				&& RAM.readyQPeek().data.getTotalTime() < oldProcess.getTotalTime()) { 
+			oldProcess.incrementNumberOfPreemptions();
+			
+			if(RAM.enoughRAM(oldProcess)) {
+				RAM.addToReadyQueue(oldProcess); // return process to the readyQ
+			} else {
+				RAM.addToWaiting(oldProcess); // goes to the midTermS
+			}
+			newProcess = RAM.readyQServe(); // change to the shorter process
+			return newProcess;
 		}
-		return current;
+		return oldProcess;
 	}
 
-	public int getbusyTime() {
+	public static int getbusyTime() {
 		return busyTime;
 	}
 
-	public int getidelTime() {
+	public static int getidelTime() {
 		return idelTime;
 	}
 }
