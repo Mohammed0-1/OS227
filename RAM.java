@@ -55,6 +55,7 @@ public class RAM extends Thread {
 		while (jobQ.length() != 0 && enoughRAM(jobQ.peek().data)) {
 			Process p = jobQ.serve();
 			addToReadyQueue(p);
+			// check arrivalTime with clock! <---------Fix
 
 			// test case ---------------------------------------
 			if (Test.TEST_MODE) {
@@ -135,6 +136,9 @@ public class RAM extends Thread {
 		if(p.getState() == STATE.waiting) {
 			waitingProcesses.remove(p);
 		}
+		if(((CPUBurst)p.getCurrentBurst()).getMemoryValue() < 0) {
+			return; // if the burst required to free the memory
+		}
 		usedRAM -= ((CPUBurst)p.getCurrentBurst()).getMemoryValue();
 	}
 
@@ -158,6 +162,7 @@ public class RAM extends Thread {
 	}
 	
 	public static void readyQEnqueue(Process p) {
+		p.setState(STATE.ready);
 		readyQ.enqueue(p.getCurrentBurst().getRemainingTime(), p);
 	}
 	
