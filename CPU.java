@@ -2,7 +2,6 @@ public class CPU extends Thread {
 	private static Process excutingProcess;
 	private static int busyTime;
 	private static int idelTime;
-	private static RAM ram;
 
 	public CPU() {
 		CPU.excutingProcess = null;
