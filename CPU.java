@@ -35,9 +35,9 @@ public class CPU extends Thread {
 
 				}
 		}
-//		if(OperatingSystem.isFullyFinished()) {
-//			OperatingSystem.writeFile();
-//		}
+		if(OperatingSystem.isFullyFinished()) {
+			OperatingSystem.writeFile();
+		}
 	}
 
 	// handle the process in the CPU

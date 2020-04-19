@@ -11,6 +11,8 @@ import jdk.management.resource.NotifyingMeter;
 public class OperatingSystem {
 	private static final String FILE_PATH = "C:\\Users\\azsal\\Desktop\\OS-227 Testfiles\\result.txt";
 	private static LinkedList<Process> finishedProcesses = new LinkedList<>();
+
+
 	private static int size = 0;
 	private static IODevice io;
 	private static RAM ram;
@@ -33,12 +35,12 @@ public class OperatingSystem {
 		ram = new RAM(jobQ);
 		io = new IODevice();
 		cpu = new CPU();
-		print = new PrintResult();
+//		print = new PrintResult();
 
 		ram.start();
 		cpu.start();
 		io.start();
-		print.start();
+//		print.start();
 
 
 	}
@@ -90,8 +92,9 @@ public class OperatingSystem {
 				// write processes to file
 				FileWriter writer = new FileWriter(FILE_PATH);
 				writer.write("CPU Utilization= " + CPUUtilization + "% \n");
+				int size = finishedProcesses.size();
 
-				for (int i = 0; i < finishedProcesses.size(); i++) { 
+				for (int i = 0; i < size; i++) { 
 					System.out.println("FP: length: "+finishedProcesses.size());
 
 					Process p = finishedProcesses.poll();
@@ -132,6 +135,9 @@ public class OperatingSystem {
 			}
 
 		}
+	public static LinkedList<Process> getFinishedProcesses() {
+		return finishedProcesses;
+	}
 		
 	}
 	
