@@ -68,7 +68,6 @@ public class CPU extends Thread {
 				e.printStackTrace();
 			}
 			currentBurst = checkReadyQueue(currentBurst);
-			// sleep??
 		}
 
 		// go to IOBurst

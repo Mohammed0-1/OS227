@@ -8,7 +8,6 @@ public class RAM extends Thread {
 	private static LinkedQueue<Process> jobQ; // Jobs that have not entered the RAM yet.
 	private static Queue<Process> waitingProcesses; // Processes that needed more memory than available.
 	private static PQKImp<Integer, Process> readyQ; // Processes that are in the RAM.
-//	private static Object syncObj;
 
 	public RAM(LinkedQueue<Process> jobQ) {
 		RAM.usedRAM = 0;
@@ -64,62 +63,11 @@ public class RAM extends Thread {
 			}
 		}
 
-//		PQKImp<Integer, Process> delayedProcess = new PQKImp<>();
 		while (jobQ.length() != 0 && enoughRAM(jobQ.peek())) {
 			Process p = jobQ.serve();
 				addToReadyQueue(p);
 
 		}
-//		while (jobQ.length() != 0 && usedRAM < 0.85 * SIZE) {
-//			addToReadyQueue(jobQ.serve());
-			
-//			// test case ---------------------------------------
-//			if (Test.TEST_MODE) {
-//				System.out.println("LongTermS while loop");
-//				System.out.println(Clock.getCurrentTime());
-//			}
-//			// -------------------------------------------------
-//
-//			if (delayedProcess.peek() != null && enoughRAM(delayedProcess.peek().data)) { // enqueue to JobQ delayed // process
-//				//----------
-//				System.out.println("1st if"); 
-//				//------------------------
-//				addToReadyQueue(delayedProcess.serve());
-//				continue;
-//			}
-//
-//			// main
-//			if (jobQ.peek().getArrivalTime() == Clock.getCurrentTime()) {
-//				//// test case ---------------------------------------
-//				if (Test.TEST_MODE)
-//					System.out.println("2.1 if");
-//				// -----------------------------------------------
-//				if (enoughRAM(jobQ.peek())) {
-//					// test case ---------------------------------------
-//					if (Test.TEST_MODE)
-//						System.out.println("2.2 if");
-//					// ------------------------------------
-//					addToReadyQueue(jobQ.serve());
-//				} else {
-//					// test case ---------------------------------------
-//					if (Test.TEST_MODE)
-//						System.out.println("else");
-//					// -------------------------------
-//					delayedProcess.enqueue(jobQ.peek().getArrivalTime(), jobQ.serve());
-//				}
-//			} else if (jobQ.peek().getArrivalTime() > Clock.getCurrentTime()) {
-//				// test case ---------------------------------------
-//				if (Test.TEST_MODE)
-//					System.out.println("else if");
-//				// ----------------------------------------------
-//				jobQ.enqueue(jobQ.serve());
-//			}
-//		}
-//		// test case ---------------------------------------
-//		if (Test.TEST_MODE)
-//			System.out.println(" In RAM exited while loop");
-//		// -------------------------------------------------
-		
 
 	}
 

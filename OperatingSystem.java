@@ -17,10 +17,8 @@ public class OperatingSystem {
 	private static IODevice io;
 	private static RAM ram;
 	private static CPU cpu;
-	private static PrintResult print;
 	private static Scanner s;
 	private static double CPUUtilization = 0;
-	public static Object syncObj = new Object();
 
 	public static void main(String[] args) {
 		s = new Scanner(System.in);
@@ -35,12 +33,10 @@ public class OperatingSystem {
 		ram = new RAM(jobQ);
 		io = new IODevice();
 		cpu = new CPU();
-//		print = new PrintResult();
 
 		ram.start();
 		cpu.start();
 		io.start();
-//		print.start();
 
 
 	}
@@ -74,9 +70,8 @@ public class OperatingSystem {
 	}
 	
 	public static void writeFile() {
-//			stopOS();
-			
-			CPUUtilization = (CPU.getbusyTime()/Clock.currentTime)*100;
+
+			CPUUtilization = (((double)CPU.getbusyTime())/Clock.currentTime)*100;
 			
 			try {
 				// create ProcessList file

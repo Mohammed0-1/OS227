@@ -2,17 +2,13 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /***
- * This class represents an IO device that handles any IO requests<br>
- * We chose to set this as a Thread class because in reality, the<br>
- * CPU does not wait for IO bursts to finish before going to the <br>
- * next process.
+ * This class represents an IO device that handles any IO requests
  */
 public class IODevice extends Thread {
 	private static Process currentProcess;
 
 //  	list for processes waiting for an IO
 	private static Queue<Process> IOWaitingList; // process in waiting state
-	private static RAM ram;
 
 	public IODevice() {
 		currentProcess = null;
@@ -20,7 +16,6 @@ public class IODevice extends Thread {
 	}
 
 	@Override
-	// soqih, start the thread
 	public void run() {
 		// While OS is running, keep handling IO requests if available
 		while (!OperatingSystem.isFullyFinished()) {
@@ -34,7 +29,6 @@ public class IODevice extends Thread {
 						e.printStackTrace();
 					}
 				}
-//			}
 		}
 
 	}

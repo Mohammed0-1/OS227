@@ -5,7 +5,6 @@ public class Process {
 	private int PID;
 	private int size;
 	private int arrivalTime;
-//	private int totalTime;
 	private int startTime, terminationTime;
 	private int readyQueueTime, CPUtime, IOtime; // the time spent there
 	private int CPUUses, IOUses, memoryWaits, numberOfPreemptions;
@@ -18,7 +17,6 @@ public class Process {
 		this.size = 0;
 		this.arrivalTime = arrivalTime;
 		this.startTime = -1;
-//		this.totalTime = totalTime;
 		this.readyQueueTime = -1;
 		this.CPUtime = 0;
 		this.IOtime = 0;
@@ -76,11 +74,6 @@ public class Process {
 		IOtime++;
 	}
 	
-//	public void decrementTotalTime() {  // dec process remaining time including burst time
-//		this.totalTime--;
-//		this.bursts.peek().decrementRemainingTime();
-//	}
-
 	public void addTosize(int s) {
 		size += s;
 	}
