@@ -57,6 +57,7 @@ public class ProcessGenerator {
 
 			// test case ---------------------------------------
 			if (Test.TEST_MODE)
+				System.out.println("In ProcessGenerator class");
 				System.out.println("File is written");
 			// -------------------------------------------------
 
@@ -113,6 +114,12 @@ public class ProcessGenerator {
 				Process p = new Process(processID, arrivalTime, processBurstsQ);
 				jobQ.enqueue(p);
 				processID++;
+				// test case ---------------------------------------
+				if (Test.TEST_MODE) {
+//					System.out.println("job in jobQ is"+jobQ.peek().getPID());
+//					System.out.println("burst time in jobQ is"+jobQ.serve().getCurrentBurst().getRemainingTime());
+				}
+				// -------------------------------------------------
 			}
 
 			reader.close();

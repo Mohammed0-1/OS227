@@ -52,56 +52,43 @@ public class RAM extends Thread {
 // takes jobs out of the job queue and inserts it in ready queue until the ram is 85% full.
 	public void longTermSchedular() {
 		PQKImp<Integer, Process> delayedProcess = new PQKImp<>();
+		addToReadyQueue(jobQ.serve());
 
-		// check for total size of process and inserts to readyQ
-		while (jobQ.length() != 0 && usedRAM < 0.85 * SIZE) {
+//		while (jobQ.length() != 0 && usedRAM < 0.85 * SIZE) {
+//
+//			if (delayedProcess.peek() != null && enoughRAM(delayedProcess.peek().data)) { // enqueue to JobQ delayed
+//																							// process
+//				addToReadyQueue(delayedProcess.serve());
+//				continue;
+//			}
+//
+//			// main
+//			if (jobQ.peek().getArrivalTime() == Clock.getCurrentTime()) {
+//				if (enoughRAM(jobQ.peek())) {
+//					addToReadyQueue(jobQ.serve());
+//				} else {
+//					delayedProcess.enqueue(jobQ.peek().getArrivalTime(), jobQ.serve());
+//				}
+//			} else if (jobQ.peek().getArrivalTime() > Clock.getCurrentTime()) {
+//				jobQ.enqueue(jobQ.serve());
+//			}
+//		}
 
-			if (delayedProcess.peek() != null && enoughRAM(delayedProcess.peek().data)) { // enqueue to JobQ delayed
-																							// process
-				addToReadyQueue(delayedProcess.serve());
-				continue;
-			}
+		// test case ---------------------------------------
+		if (Test.TEST_MODE)
+//			System.out.println("could not add " + jobQ.peek().getPID() + " and its size is"
+//					+ ((CPUBurst) jobQ.peek().getCurrentBurst()).getMemoryValue());
+			// -------------------------------------------------
 
-			// main
-			if (jobQ.peek().getArrivalTime() == Clock.getCurrentTime()) {
-				if (enoughRAM(jobQ.peek())) {
-					addToReadyQueue(jobQ.serve());
-				} else {
-					delayedProcess.enqueue(jobQ.peek().getArrivalTime(), jobQ.serve());
-				}
-			} else if (jobQ.peek().getArrivalTime() > Clock.getCurrentTime()) {
-				jobQ.enqueue(jobQ.serve());
-			}
-
-
+			// just waist time :)
+//		if (jobQ.length() != 0) {
+//			Process p = jobQ.serve();
+//			jobQ.enqueue(p); // we might do a sleep???
+//		}
 
 			// test case ---------------------------------------
-//			if (Test.TEST_MODE) {
-//				System.out.println("added " + p.getPID() + " and it's size is " + p.getSize()
-//						+ " and it's first burst is " + p.getCurrentBurst().getRemainingTime());
-//				System.out.println("the length of readyQ is " + readyQ.length());
-//				System.out.println("the size of the first process in ready Q is " + readyQ.peek().data.getSize()
-//						+ " and it's name is " + readyQ.peek().data.getPID());
-//				System.out.println("ram in use " + usedRAM);
-//			}
-			// -------------------------------------------------
-		}
-
-		// test case ---------------------------------------
-		if (Test.TEST_MODE)
-			System.out.println("could not add " + jobQ.peek().getPID() + " and its size is"
-					+ ((CPUBurst) jobQ.peek().getCurrentBurst()).getMemoryValue());
-		// -------------------------------------------------
-
-		// just waist time :)
-		if (jobQ.length() != 0) {
-			Process p = jobQ.serve();
-			jobQ.enqueue(p); // we might do a sleep???
-		}
-
-		// test case ---------------------------------------
-		if (Test.TEST_MODE)
-			System.out.println("exited while loop");
+			if (Test.TEST_MODE)
+				System.out.println("exited while loop");
 		// -------------------------------------------------
 
 	}
@@ -126,6 +113,9 @@ public class RAM extends Thread {
 		readyQ.enqueue(p.getCurrentBurst().getRemainingTime(), p);
 		p.setState(STATE.ready);
 		allocateRAM(p);
+		//
+		System.out.println("readyQ lenght: " + readyQ.length() + " PID: " + readyQ.peek().data.getPID());
+		//
 	}
 
 // Checks if the system is in a deadlock.
@@ -157,12 +147,18 @@ public class RAM extends Thread {
 
 // Allocates memory to a process as needed.
 	private static void allocateRAM(Process p) {
+		if (p.getCurrentBurst() instanceof IOBurst) { // TO-DO---------------------
+			return;
+		}
 		usedRAM += ((CPUBurst) p.getCurrentBurst()).getMemoryValue();
 		p.addTosize(((CPUBurst) p.getCurrentBurst()).getMemoryValue());
 	}
 
 // Checks if adding a process will make the RAM 85% full or not.
 	public static boolean enoughRAM(Process p) {
+		if (p.getCurrentBurst() instanceof IOBurst) { // TO-DO---------------------
+			return true;
+		}
 		int size = ((CPUBurst) p.getCurrentBurst()).getMemoryValue();
 		return size + usedRAM <= SIZE * 0.85;
 	}

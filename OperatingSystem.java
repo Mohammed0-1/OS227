@@ -19,6 +19,7 @@ public class OperatingSystem {
 //    Clock clock =new Clock();
        
     public static void main(String[] args) {
+    	ProcessGenerator.generateProcesses(5);
     	LinkedQueue<Process> jobQ = ProcessGenerator.generateJobQ();
     	int jobQSize = jobQ.length();
     	size = jobQSize;

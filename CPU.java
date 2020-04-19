@@ -17,7 +17,7 @@ public class CPU extends Thread {
 				excuteProcess();
 			} else {
 				try {
-					sleep(1);
+					sleep(2000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -26,6 +26,7 @@ public class CPU extends Thread {
 
 				// test case ---------------------------------------
 				if (Test.TEST_MODE) {
+					System.out.println("In CPU class");
 					System.out.println("down time " + idelTime);
 					System.out.println("clock time " + Clock.currentTime);
 				}
