@@ -68,19 +68,11 @@ public class CPU extends Thread {
 			if (excutingProcess.getCurrentBurst() instanceof IOBurst) {
 				// add to IOwaiting
 				IODevice.addProcessToDevice(excutingProcess);
-				
-				
-			} else {
-				if (excutingProcess.getCurrentBurst().getRemainingTime() == -1) {
-					excutingProcess.terminateProcess();
-				} else {
-					RAM.addToReadyQueue(excutingProcess);
-				}
-			}
-
+			} 
+			
 		} else {
 			excutingProcess.terminateProcess();
-			RAM.freeRAM(excutingProcess); // must do each time a burst has finished <------FIX
+			RAM.freeRAM(excutingProcess);
 		}
 	}
 

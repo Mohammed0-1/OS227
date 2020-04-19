@@ -13,9 +13,9 @@ public class Process {
 	private STATE state;
 	private LinkedQueue<Burst> bursts;
 
-	public Process(int PID, int arrivalTime, int processSize,/* int totalTime,*/ LinkedQueue<Burst> bursts) {
+	public Process(int PID, int arrivalTime, LinkedQueue<Burst> bursts) {
 		this.PID = PID;
-		this.size = processSize;
+		this.size = 0;
 		this.arrivalTime = arrivalTime;
 		this.startTime = -1;
 //		this.totalTime = totalTime;

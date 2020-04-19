@@ -67,13 +67,13 @@ public class ProcessGenerator {
 	}
 
 	// read from ProcessList file
-	public static PQKImp<Integer, Process> generateJobQ() {
+	public static LinkedQueue<Process> generateJobQ() {
 		String line; // represents a process
 		int processID = 1;
 		int CPUBurstRange, burstMemorySize, IOBurstRange, arrivalTime; // created local variables so it doesn't conflict.
-		int processMemorySize = 0;
+
 																			
-		PQKImp<Integer, Process> jobQ = new PQKImp<Integer, Process>(); // the returned processes
+		LinkedQueue<Process> jobQ = new LinkedQueue<>(); // the returned processes
 
 		try {
 			// initiate a reader
@@ -101,7 +101,6 @@ public class ProcessGenerator {
 					CPUBurstRange = Integer.parseInt(processArray[i]);
 					burstMemorySize = Integer.parseInt(processArray[i + 1]);
 					IOBurstRange = Integer.parseInt(processArray[i + 2]);
-					processMemorySize += burstMemorySize; // total memory size for process
 
 					Burst cpuBurst = new CPUBurst(CPUBurstRange, burstMemorySize);
 					Burst ioBurst = new IOBurst(IOBurstRange);
@@ -111,8 +110,8 @@ public class ProcessGenerator {
 				}
 
 				arrivalTime = generateArrivalTime();
-				Process p = new Process(processID, arrivalTime, processMemorySize, processBurstsQ);
-				jobQ.enqueue(p.getArrivalTime(), p);
+				Process p = new Process(processID, arrivalTime, processBurstsQ);
+				jobQ.enqueue(p);
 				processID++;
 			}
 
@@ -139,15 +138,14 @@ public class ProcessGenerator {
 	}
 
 	// Main test case ---------------------------------------
-	public static void main(String[] args) {
-		if (Test.TEST_MODE) {
-			ProcessGenerator.generateProcesses(5);
-			PQKImp<Integer, Process> JobQ = ProcessGenerator.generateJobQ();
-			for (int i = 0; i < JobQ.length(); i++) {
-				System.out.println(JobQ.serve().toString());
-			}
-		}
-	}
+//	public static void main(String[] args) {
+//		if (Test.TEST_MODE) {
+//			LinkedQueue<Process> JobQ = ProcessGenerator.generateJobQ();
+//			for (int i = 0; i < JobQ.length(); i++) {
+//				System.out.println(JobQ.serve().toString());
+//			}
+//		}
+//	}
 	// -------------------------------------------------
 
 }
