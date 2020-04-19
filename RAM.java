@@ -2,6 +2,8 @@ import DataStructures.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import com.sun.org.apache.xml.internal.security.keys.storage.implementations.SingleCertificateResolver;
+
 public class RAM extends Thread {
 	private static final int SIZE = 704; // 1024 - 320 MB
 	private static int usedRAM;
@@ -18,9 +20,9 @@ public class RAM extends Thread {
 
 	public void run() {
 		while (true) {
+			midTermSchedular();
+			longTermSchedular();
 			try {
-				midTermSchedular();
-				longTermSchedular();
 				Thread.sleep(200); // every 200ms longTermS will wake-up (point 11,4 in project description)
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -52,27 +54,41 @@ public class RAM extends Thread {
 // takes jobs out of the job queue and inserts it in ready queue until the ram is 85% full.
 	public void longTermSchedular() {
 		PQKImp<Integer, Process> delayedProcess = new PQKImp<>();
-		addToReadyQueue(jobQ.serve());
-
-//		while (jobQ.length() != 0 && usedRAM < 0.85 * SIZE) {
-//
-//			if (delayedProcess.peek() != null && enoughRAM(delayedProcess.peek().data)) { // enqueue to JobQ delayed
-//																							// process
-//				addToReadyQueue(delayedProcess.serve());
-//				continue;
-//			}
-//
-//			// main
-//			if (jobQ.peek().getArrivalTime() == Clock.getCurrentTime()) {
-//				if (enoughRAM(jobQ.peek())) {
-//					addToReadyQueue(jobQ.serve());
-//				} else {
-//					delayedProcess.enqueue(jobQ.peek().getArrivalTime(), jobQ.serve());
-//				}
-//			} else if (jobQ.peek().getArrivalTime() > Clock.getCurrentTime()) {
-//				jobQ.enqueue(jobQ.serve());
-//			}
+		
+//		while (jobQ.length() != 0 && enoughRAM(jobQ.peek())) {
+//			//
+//			System.out.println("in while");
+//			//
+//			Process p = jobQ.serve();
+//				addToReadyQueue(p);
 //		}
+		
+//		addToReadyQueue(jobQ.serve());
+
+		while (jobQ.length() != 0 && usedRAM < 0.85 * SIZE) {
+			System.out.println(Clock.getCurrentTime());
+			System.out.println("LongTermS while loop");
+			if (delayedProcess.peek() != null && enoughRAM(delayedProcess.peek().data)) { // enqueue to JobQ delayed
+				System.out.println("1st if");																	// process
+				addToReadyQueue(delayedProcess.serve());
+				continue;
+			}
+
+			// main
+			if (jobQ.peek().getArrivalTime() == Clock.getCurrentTime()) {
+				System.out.println("2.1 if");
+				if (enoughRAM(jobQ.peek())) {
+					System.out.println("2.2 if");
+					addToReadyQueue(jobQ.serve());
+				} else {
+					System.out.println("else");
+					delayedProcess.enqueue(jobQ.peek().getArrivalTime(), jobQ.serve());
+				}
+			} else if (jobQ.peek().getArrivalTime() > Clock.getCurrentTime()) {
+				System.out.println("else if");
+				jobQ.enqueue(jobQ.serve());
+			}
+		}
 
 		// test case ---------------------------------------
 		if (Test.TEST_MODE)
@@ -88,7 +104,7 @@ public class RAM extends Thread {
 
 			// test case ---------------------------------------
 			if (Test.TEST_MODE)
-				System.out.println("exited while loop");
+				System.out.println(" In RAM exited while loop");
 		// -------------------------------------------------
 
 	}
@@ -114,7 +130,8 @@ public class RAM extends Thread {
 		p.setState(STATE.ready);
 		allocateRAM(p);
 		//
-		System.out.println("readyQ lenght: " + readyQ.length() + " PID: " + readyQ.peek().data.getPID());
+		if (Test.TEST_MODE)
+		System.out.println("readyQ lenght: " + readyQ.length() + " PID: " + p.getPID());
 		//
 	}
 

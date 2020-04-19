@@ -17,7 +17,7 @@ public class CPU extends Thread {
 				excuteProcess();
 			} else {
 				try {
-					sleep(2000);
+					sleep(1);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
