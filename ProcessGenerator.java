@@ -144,15 +144,5 @@ public class ProcessGenerator {
 		return arrivalTime;
 	}
 
-	// Main test case ---------------------------------------
-//	public static void main(String[] args) {
-//		if (Test.TEST_MODE) {
-//			LinkedQueue<Process> JobQ = ProcessGenerator.generateJobQ();
-//			for (int i = 0; i < JobQ.length(); i++) {
-//				System.out.println(JobQ.serve().toString());
-//			}
-//		}
-//	}
-	// -------------------------------------------------
 
 }

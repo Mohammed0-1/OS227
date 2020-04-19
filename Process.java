@@ -28,7 +28,7 @@ public class Process {
 		this.numberOfPreemptions = 0;
 		this.bursts = bursts;
 		this.state = STATE.waiting;
-		this.currentBurst = this.bursts.serve(); // serve or peak??
+		this.currentBurst = this.bursts.peek(); // serve or peak??
 	}
 
 	// Kills a process when the system is in deadlock.
@@ -36,6 +36,8 @@ public class Process {
 	// sets the process state to KILLED.
 	public void killProcess() {
 		this.state = STATE.killed;
+		if (OperatingSystem.isFullyFinished())
+			OperatingSystem.stopOS();
 		setTerminationTime(Clock.currentTime);
 
 	}
@@ -45,6 +47,8 @@ public class Process {
 	// sets the process state to TERMINATED.
 	public void terminateProcess() {
 		this.state = STATE.terminated;
+		if (OperatingSystem.isFullyFinished())
+			OperatingSystem.stopOS();
 		setTerminationTime(Clock.currentTime);
 	}
 
@@ -86,7 +90,8 @@ public class Process {
 	}
 
 	public Burst nextBurst() {
-		return currentBurst = bursts.serve();
+		currentBurst= bursts.serve();
+		return bursts.peek();
 	}
 
 //	Getters and Setters -----------------------------------

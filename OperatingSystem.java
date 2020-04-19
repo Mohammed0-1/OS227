@@ -1,10 +1,12 @@
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.Thread.State;
 import java.util.LinkedList;
 import java.util.Scanner;
 
 import DataStructures.LinkedQueue;
+import jdk.management.resource.NotifyingMeter;
 
 public class OperatingSystem {
 	private static final String FILE_PATH = "C:\\Users\\azsal\\Desktop\\OS-227 Testfiles\\result.txt";
@@ -13,19 +15,16 @@ public class OperatingSystem {
 	private static IODevice io;
 	private static RAM ram;
 	private static CPU cpu;
+	private static PrintResult print;
 	private static Scanner s;
-	private static double CPUUtilization;
-
-//    RAM ram = new RAM(new IODevice());
-//    CPU cpu = new CPU(new RAM(new IODevice()));
-//    Clock clock =new Clock();
+	private static double CPUUtilization = 0;
+	public static Object syncObj = new Object();
 
 	public static void main(String[] args) {
 		s = new Scanner(System.in);
 		System.out.println("Enter number of processes");
 		int processNum = s.nextInt();
-		
-		
+
 		ProcessGenerator.generateProcesses(processNum);
 		LinkedQueue<Process> jobQ = ProcessGenerator.generateJobQ();
 		int jobQSize = jobQ.length();
@@ -34,28 +33,49 @@ public class OperatingSystem {
 		ram = new RAM(jobQ);
 		io = new IODevice();
 		cpu = new CPU();
+		print = new PrintResult();
 
 		ram.start();
 		cpu.start();
 		io.start();
+		print.start();
 
-		if (isFullyFinished()) {
-			stopOS();
+
+	}
+	
+
+	static void stopOS() {
+		try {
+			sleepAllThreads();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	@SuppressWarnings("deprecation")
+	private static void sleepAllThreads() throws InterruptedException {
+		io.sleep(2000);
+		ram.sleep(2000);
+		cpu.sleep(2000);
+		io.destroy();
+		ram.destroy();
+		cpu.destroy();
+	}
+
+	public static void addFinishedProcess(Process process) {
+		finishedProcesses.add(process);
+	}
+
+	public static boolean isFullyFinished() {
+		return OperatingSystem.size == OperatingSystem.finishedProcesses.size();
+	}
+	
+	public static void writeFile() {
+//			stopOS();
 			
 			CPUUtilization = (CPU.getbusyTime()/Clock.currentTime)*100;
 			
-			for (int i = 0; i < finishedProcesses.size(); i++) {
-				System.out.println(finishedProcesses.poll().getPID());
-				System.out.println(finishedProcesses.poll().getReadyQueueTime());
-				System.out.println(finishedProcesses.poll().getCPUUses());
-				System.out.println(finishedProcesses.poll().getCPUtime());
-//    		   System.out.println(finishedProcesses.poll().getPID());
-//    		   System.out.println(finishedProcesses.poll().getPID());
-//    		   System.out.println(finishedProcesses.poll().getPID());
-//    		   System.out.println(finishedProcesses.poll().getPID());
-//    		   System.out.println(finishedProcesses.poll().getPID());
-			}
-
 			try {
 				// create ProcessList file
 				File file = new File(FILE_PATH);
@@ -71,7 +91,8 @@ public class OperatingSystem {
 				FileWriter writer = new FileWriter(FILE_PATH);
 				writer.write("CPU Utilization= " + CPUUtilization + "% \n");
 
-				for (int i = 0; i < finishedProcesses.size(); i++) { // each line represents a process
+				for (int i = 0; i < finishedProcesses.size(); i++) { 
+					System.out.println("FP: length: "+finishedProcesses.size());
 
 					Process p = finishedProcesses.poll();
 					writer.write("Process ID: " + p.getPID());
@@ -94,7 +115,7 @@ public class OperatingSystem {
 					writer.write("\n");
 					writer.write("final state: " + p.getState());
 					writer.write("\n");
-					writer.write("----------------------------------- End Of Process "+ p.getPID() +"-----------------------------------------");
+					writer.write("----------------------------------- End Of Process "+ p.getPID() +"-----------------------------------------\n");
 
 				}
 
@@ -111,29 +132,6 @@ public class OperatingSystem {
 			}
 
 		}
-
+		
 	}
-
-	static void stopOS() {
-		try {
-			sleepAllThreads();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	private static void sleepAllThreads() throws InterruptedException {
-		io.sleep(1000);
-		ram.sleep(1000);
-		cpu.sleep(1000);
-	}
-
-	public static void addFinishedProcess(Process process) {
-		finishedProcesses.add(process);
-	}
-
-	public static boolean isFullyFinished() {
-		return OperatingSystem.size == OperatingSystem.finishedProcesses.size();
-	}
-}
+	

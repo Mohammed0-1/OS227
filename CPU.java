@@ -2,6 +2,7 @@ public class CPU extends Thread {
 	private static Process excutingProcess;
 	private static int busyTime;
 	private static int idelTime;
+	private static RAM ram;
 
 	public CPU() {
 		CPU.excutingProcess = null;
@@ -11,29 +12,32 @@ public class CPU extends Thread {
 
 	@Override
 	public void run() {
-		while (true) {
-			excutingProcess = RAM.readyQServe();
-			if (excutingProcess != null) {
-				excuteProcess();
-			} else {
-				try {
-					sleep(1);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				idelTime++;
-				Clock.incrementClock();
+		while (!OperatingSystem.isFullyFinished()) {
+				excutingProcess = RAM.readyQServe();
+				if (excutingProcess != null) {
+					excuteProcess();
+				} else {
+					idelTime++;
+					Clock.incrementClock();
+					try {
+						sleep(1);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 
-				// test case ---------------------------------------
-				if (Test.TEST_MODE) {
-					System.out.println("In CPU class");
-					System.out.println("down time " + idelTime);
-					System.out.println("clock time " + Clock.currentTime);
-				}
-				// -------------------------------------------------
+					// test case ---------------------------------------
+					if (Test.TEST_MODE) {
+						System.out.println("In CPU class");
+						System.out.println("down time " + idelTime);
+						System.out.println("clock time " + Clock.currentTime);
+					}
+					// -------------------------------------------------
 
-			}
+				}
 		}
+//		if(OperatingSystem.isFullyFinished()) {
+//			OperatingSystem.writeFile();
+//		}
 	}
 
 	// handle the process in the CPU
@@ -58,7 +62,12 @@ public class CPU extends Thread {
 				System.out.println("up time " + busyTime);
 			}
 			// -------------------------------------------------
-
+			try {
+				// Wait for x millisecond before proceeding
+				sleep(1);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			currentBurst = checkReadyQueue(currentBurst);
 			// sleep??
 		}
@@ -69,8 +78,8 @@ public class CPU extends Thread {
 			if (excutingProcess.getCurrentBurst() instanceof IOBurst) {
 				// add to IOwaiting
 				IODevice.addProcessToDevice(excutingProcess);
-			} 
-			
+			}
+
 		} else {
 			excutingProcess.terminateProcess();
 			RAM.freeRAM(excutingProcess);

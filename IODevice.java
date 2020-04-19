@@ -12,6 +12,7 @@ public class IODevice extends Thread {
 
 //  	list for processes waiting for an IO
 	private static Queue<Process> IOWaitingList; // process in waiting state
+	private static RAM ram;
 
 	public IODevice() {
 		currentProcess = null;
@@ -22,19 +23,18 @@ public class IODevice extends Thread {
 	// soqih, start the thread
 	public void run() {
 		// While OS is running, keep handling IO requests if available
-		while (true) {
-
-			currentProcess = IOWaitingList.poll();
-
-			if (currentProcess != null) {
-				handleIORequest();
-			} else {
-				try {
-					sleep(1);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+		while (!OperatingSystem.isFullyFinished()) {
+				currentProcess = IOWaitingList.poll();
+				if (currentProcess != null) {
+					handleIORequest();
+				} else {
+					try {
+						sleep(1);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
-			}
+//			}
 		}
 
 	}
